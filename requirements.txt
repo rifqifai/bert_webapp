@@ -1,4 +1,5 @@
 flask
 torch
 transformers
+gunicorn
 safetensors

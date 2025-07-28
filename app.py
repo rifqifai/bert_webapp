@@ -2,15 +2,15 @@ from flask import Flask, request, render_template
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
 import re
+import os
 
 app = Flask(__name__)
 
-# Load model & tokenizer
-model_path = "model"
-tokenizer = AutoTokenizer.from_pretrained(model_path)
-model = AutoModelForSequenceClassification.from_pretrained(model_path)
+# === Load model/tokenizer dari folder model ===
+MODEL_DIR = os.path.join(os.path.dirname(__file__), 'model')
+tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR)
+model = AutoModelForSequenceClassification.from_pretrained(MODEL_DIR)
 
-# Label reverse mapping
 label_map_inv = {0: 'negatif', 1: 'netral', 2: 'positif'}
 
 def preprocess(text):
@@ -35,5 +35,4 @@ def index():
         result = predict_sentiment(input_text)
     return render_template("index.html", result=result)
 
-if __name__ == "__main__":
-    app.run(debug=True)
+# Gunicorn akan menjalankan app:app, jadi tidak pakai app.run()
