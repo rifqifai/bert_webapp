@@ -1,5 +1,6 @@
-flask
-torch
-transformers
-gunicorn
-safetensors
+flask==2.3.3
+torch==2.0.1
+transformers==4.35.0
+gunicorn==21.2.0
+safetensors==0.4.0
+numpy==1.24.3
