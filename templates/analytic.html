@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Analytics - Prediksi Sentimen{% endblock %}
+
+{% block extra_head %}
+<script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-upload-section">
+        <h2>📊 Dashboard Analytics</h2>
+        <p>Upload file CSV/Excel untuk melihat analisis sentimen yang mendalam</p>
+        
+        <div class="dashboard-file-upload" id="fileUpload">
+            <div class="dashboard-upload-icon">📁</div>
+            <div class="dashboard-upload-text">
+                <strong>Klik untuk memilih file</strong><br>
+                atau drag & drop file CSV/Excel di sini
+            </div>
+            <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="display: none;">
+            <button class="dashboard-upload-btn" onclick="document.getElementById('fileInput').click()">
+                Pilih File
+            </button>
+        </div>
+        
+        <div class="dashboard-loading" id="loading">
+            <div class="dashboard-spinner"></div>
+            <p>Sedang menganalisis data...</p>
+        </div>
+        
+        <div class="dashboard-error-message" id="errorMessage"></div>
+    </div>
+    
+    <div class="dashboard-analytics-section" id="analyticsSection">
+        <!-- Statistics Cards -->
+        <div class="dashboard-stats-grid">
+            <div class="dashboard-stat-card">
+                <div class="dashboard-stat-number" id="totalAnalyzed">0</div>
+                <div class="dashboard-stat-label">Total Data Dianalisis</div>
+            </div>
+            <div class="dashboard-stat-card">
+                <div class="dashboard-stat-number" id="positivePercent">0%</div>
+                <div class="dashboard-stat-label">Sentimen Positif</div>
+            </div>
+            <div class="dashboard-stat-card">
+                <div class="dashboard-stat-number" id="neutralPercent">0%</div>
+                <div class="dashboard-stat-label">Sentimen Netral</div>
+            </div>
+            <div class="dashboard-stat-card">
+                <div class="dashboard-stat-number" id="negativePercent">0%</div>
+                <div class="dashboard-stat-label">Sentimen Negatif</div>
+            </div>
+        </div>
+        
+        <!-- Charts -->
+        <div class="dashboard-charts-grid">
+            <div class="dashboard-chart-container">
+                <div class="dashboard-chart-title">Distribusi Sentimen</div>
+                <div class="dashboard-chart-canvas">
+                    <canvas id="sentimentChart"></canvas>
+                </div>
+            </div>
+            <div class="dashboard-chart-container">
+                <div class="dashboard-chart-title">Rata-rata Probabilitas</div>
+                <div class="dashboard-chart-canvas">
+                    <canvas id="probabilityChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Keywords -->
+        <div class="dashboard-keywords-section">
+            <div class="dashboard-chart-title">Kata Kunci Teratas</div>
+            <div class="dashboard-keywords-grid" id="keywordsGrid">
+                <!-- Keywords will be populated here -->
+            </div>
+        </div>
+        
+        <!-- Confidence Scores -->
+        <div class="dashboard-confidence-section">
+            <div class="dashboard-chart-title">Prediksi dengan Confidence Tertinggi</div>
+            <div class="dashboard-confidence-list" id="confidenceList">
+                <!-- Confidence items will be populated here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let sentimentChart, probabilityChart;
+
+// File upload handling
+document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+document.getElementById('fileUpload').addEventListener('dragover', handleDragOver);
+document.getElementById('fileUpload').addEventListener('drop', handleDrop);
+
+function handleDragOver(e) {
+    e.preventDefault();
+    document.getElementById('fileUpload').classList.add('dragover');
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('fileUpload').classList.remove('dragover');
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        handleFile(files[0]);
+    }
+}
+
+function handleFileUpload(e) {
+    const file = e.target.files[0];
+    if (file) {
+        handleFile(file);
+    }
+}
+
+function handleFile(file) {
+    // Show loading
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('analyticsSection').style.display = 'none';
+    document.getElementById('errorMessage').style.display = 'none';
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    fetch('/api/analytics', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('loading').style.display = 'none';
+        
+        if (data.success) {
+            displayAnalytics(data.analytics);
+            document.getElementById('analyticsSection').style.display = 'block';
+        } else {
+            showError(data.error);
+        }
+    })
+    .catch(error => {
+        document.getElementById('loading').style.display = 'none';
+        showError('Terjadi kesalahan saat memproses file: ' + error.message);
+    });
+}
+
+function displayAnalytics(analytics) {
+    // Update statistics
+    document.getElementById('totalAnalyzed').textContent = analytics.total_analyzed;
+    document.getElementById('positivePercent').textContent = analytics.sentiment_percentages.positif + '%';
+    document.getElementById('neutralPercent').textContent = analytics.sentiment_percentages.netral + '%';
+    document.getElementById('negativePercent').textContent = analytics.sentiment_percentages.negatif + '%';
+    
+    // Create charts
+    createSentimentChart(analytics.sentiment_distribution);
+    createProbabilityChart(analytics.average_probabilities);
+    
+    // Display keywords
+    displayKeywords(analytics.top_keywords);
+    
+    // Display confidence scores
+    displayConfidenceScores(analytics.confidence_scores);
+}
+
+function createSentimentChart(distribution) {
+    const ctx = document.getElementById('sentimentChart').getContext('2d');
+    
+    if (sentimentChart) {
+        sentimentChart.destroy();
+    }
+    
+    sentimentChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Negatif', 'Netral', 'Positif'],
+            datasets: [{
+                data: [distribution.negatif, distribution.netral, distribution.positif],
+                backgroundColor: ['#dc3545', '#6c757d', '#28a745'],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+function createProbabilityChart(probabilities) {
+    const ctx = document.getElementById('probabilityChart').getContext('2d');
+    
+    if (probabilityChart) {
+        probabilityChart.destroy();
+    }
+    
+    probabilityChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Negatif', 'Netral', 'Positif'],
+            datasets: [{
+                label: 'Rata-rata Probabilitas (%)',
+                data: [probabilities.negatif, probabilities.netral, probabilities.positif],
+                backgroundColor: ['#dc3545', '#6c757d', '#28a745'],
+                borderColor: ['#c82333', '#5a6268', '#1e7e34'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+}
+
+function displayKeywords(keywords) {
+    const container = document.getElementById('keywordsGrid');
+    container.innerHTML = '';
+    
+    keywords.forEach(keyword => {
+        const item = document.createElement('div');
+        item.className = 'dashboard-keyword-item';
+        item.innerHTML = `
+            <div class="dashboard-keyword-word">${keyword.word}</div>
+            <div class="dashboard-keyword-count">${keyword.count} kali</div>
+        `;
+        container.appendChild(item);
+    });
+}
+
+function displayConfidenceScores(scores) {
+    const container = document.getElementById('confidenceList');
+    container.innerHTML = '';
+    
+    scores.forEach(score => {
+        const item = document.createElement('div');
+        item.className = 'dashboard-confidence-item';
+        item.innerHTML = `
+            <div class="dashboard-confidence-info">
+                <span class="dashboard-confidence-badge ${score.sentiment}">${score.sentiment}</span>
+                <span>Data #${score.index}</span>
+            </div>
+            <div class="dashboard-confidence-score">${score.confidence}%</div>
+        `;
+        container.appendChild(item);
+    });
+}
+
+function showError(message) {
+    const errorDiv = document.getElementById('errorMessage');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+}
+</script>
+{% endblock %} 

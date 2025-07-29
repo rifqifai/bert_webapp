@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, send_file
+from flask import Flask, request, render_template, send_file, jsonify
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
 import re
@@ -8,6 +8,8 @@ import io
 import base64
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
+from collections import Counter
+import json
 
 app = Flask(__name__)
 
@@ -61,6 +63,72 @@ def process_file_data(df, text_column):
     
     return results
 
+def calculate_analytics(results):
+    """Calculate analytics from sentiment results"""
+    if not results:
+        return {
+            'total_analyzed': 0,
+            'sentiment_distribution': {'negatif': 0, 'netral': 0, 'positif': 0},
+            'sentiment_percentages': {'negatif': 0, 'netral': 0, 'positif': 0},
+            'average_probabilities': {'negatif': 0, 'netral': 0, 'positif': 0},
+            'confidence_scores': [],
+            'top_keywords': []
+        }
+    
+    # Basic statistics
+    total_analyzed = len(results)
+    sentiment_counts = Counter([r['sentiment'] for r in results])
+    sentiment_distribution = dict(sentiment_counts)
+    
+    # Calculate percentages
+    sentiment_percentages = {
+        'negatif': round((sentiment_distribution.get('negatif', 0) / total_analyzed) * 100, 2),
+        'netral': round((sentiment_distribution.get('netral', 0) / total_analyzed) * 100, 2),
+        'positif': round((sentiment_distribution.get('positif', 0) / total_analyzed) * 100, 2)
+    }
+    
+    # Average probabilities
+    avg_negatif = sum(r['negatif_prob'] for r in results) / total_analyzed
+    avg_netral = sum(r['netral_prob'] for r in results) / total_analyzed
+    avg_positif = sum(r['positif_prob'] for r in results) / total_analyzed
+    
+    average_probabilities = {
+        'negatif': round(avg_negatif, 2),
+        'netral': round(avg_netral, 2),
+        'positif': round(avg_positif, 2)
+    }
+    
+    # Confidence scores (max probability for each prediction)
+    confidence_scores = []
+    for r in results:
+        max_prob = max(r['negatif_prob'], r['netral_prob'], r['positif_prob'])
+        confidence_scores.append({
+            'index': r['index'],
+            'confidence': round(max_prob, 2),
+            'sentiment': r['sentiment']
+        })
+    
+    # Sort by confidence (descending)
+    confidence_scores.sort(key=lambda x: x['confidence'], reverse=True)
+    
+    # Extract keywords (simple approach - most common words)
+    all_text = ' '.join([r['text'] for r in results])
+    words = re.findall(r'\b[a-z]{3,}\b', all_text.lower())
+    word_counts = Counter(words)
+    # Remove common Indonesian stop words
+    stop_words = {'yang', 'dan', 'dengan', 'dari', 'untuk', 'dalam', 'pada', 'ke', 'di', 'sebagai', 'oleh', 'itu', 'ini', 'atau', 'juga', 'akan', 'bisa', 'dapat', 'sudah', 'masih', 'sangat', 'lebih', 'kurang', 'sama', 'lain', 'lainnya', 'semua', 'setiap', 'beberapa', 'banyak', 'sedikit', 'tidak', 'bukan', 'tanpa', 'dengan', 'oleh', 'karena', 'jika', 'ketika', 'sebelum', 'sesudah', 'selama', 'sampai', 'hingga', 'melalui', 'terhadap', 'tentang', 'mengenai', 'berdasarkan', 'menurut', 'seperti', 'bagi', 'untuk', 'kepada', 'dari', 'oleh', 'dengan', 'tanpa', 'melalui', 'terhadap', 'tentang', 'mengenai', 'berdasarkan', 'menurut', 'seperti', 'bagi', 'untuk', 'kepada'}
+    filtered_words = {word: count for word, count in word_counts.items() if word not in stop_words}
+    top_keywords = [{'word': word, 'count': count} for word, count in sorted(filtered_words.items(), key=lambda x: x[1], reverse=True)[:10]]
+    
+    return {
+        'total_analyzed': total_analyzed,
+        'sentiment_distribution': sentiment_distribution,
+        'sentiment_percentages': sentiment_percentages,
+        'average_probabilities': average_probabilities,
+        'confidence_scores': confidence_scores[:10],  # Top 10 most confident
+        'top_keywords': top_keywords
+    }
+
 def read_file_data(file):
     """Read file data based on file extension"""
     filename = file.filename.lower()
@@ -80,6 +148,48 @@ def index():
         input_text = request.form["text"]
         result, probabilities = predict_sentiment(input_text)
     return render_template("index.html", result=result, probabilities=probabilities, header_title="Prediksi Sentimen Argumen Sampah")
+
+@app.route("/analytic")
+def analytic():
+    """Dashboard analytics page"""
+    return render_template("analytic.html", header_title="Dashboard Analytics")
+
+@app.route("/api/analytics", methods=["POST"])
+def api_analytics():
+    """API endpoint for analytics calculation"""
+    if 'file' not in request.files:
+        return jsonify({'error': 'Tidak ada file yang dipilih'}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'Tidak ada file yang dipilih'}), 400
+    
+    try:
+        # Read file data
+        df = read_file_data(file)
+        
+        # Automatically use 'text' column or first column if 'text' doesn't exist
+        if 'text' in df.columns:
+            text_column = 'text'
+        else:
+            text_column = df.columns[0]
+        
+        # Process data
+        results = process_file_data(df, text_column)
+        
+        # Calculate analytics
+        analytics = calculate_analytics(results)
+        
+        return jsonify({
+            'success': True,
+            'analytics': analytics,
+            'results': results,
+            'filename': file.filename,
+            'text_column': text_column
+        })
+        
+    except Exception as e:
+        return jsonify({'error': f'Error memproses file: {str(e)}'}), 400
 
 @app.route("/download-template")
 def download_template():

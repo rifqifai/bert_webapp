@@ -2,16 +2,21 @@
 <html lang="id">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Aplikasi Prediksi Sentimen Argumen Sampah dengan AI">
+  <meta name="keywords" content="sentiment analysis, AI, machine learning, indonesia">
+  <meta name="author" content="Sentiment Analysis App">
   <title>{% block title %}Prediksi Sentimen{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   {% block extra_head %}{% endblock %}
 </head>
 <body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
   <div class="spiral-bg"></div>
 
   {% include 'partials/header.html' %}
 
-  <main>
+  <main id="main-content">
     {% block content %}{% endblock %}
   </main>
 
