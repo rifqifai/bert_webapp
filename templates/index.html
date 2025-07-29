@@ -1,235 +1,56 @@
-<!doctype html>
-<html lang="id">
-<head>
-  <meta charset="utf-8">
-  <title>Prediksi Sentimen Sampah</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+{% extends "base.html" %}
 
-    body {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      min-height: 100vh;
-      /* existing styles */
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f5f7fa;
-      position: relative;
-      overflow: hidden;
-    }
+{% block title %}Prediksi Sentimen Sampah{% endblock %}
 
-    /* Spiral Gradient Background */
-    .spiral-bg {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 200vmax;
-      height: 200vmax;
-      transform: translate(-50%, -50%);
-      border-radius: 50%;
-      background: conic-gradient(
-        #FFB74D,   /* Orange */
-        #ffff61,   /* Coral */
-        #c8ff76,   /* Yellow */
-        #73deb5,   /* Green */
-        #64B5F6    /* Blue */
-      );
-      animation:
-        spin 10s linear infinite;
-      filter: blur(120px);
-      z-index: -1;
-    }
-
-    @keyframes spin {
-      0%   { transform: translate(-50%, -50%) rotate(0deg); }
-      100% { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-
-    header {
-      background-color: rgba(44, 62, 80, 0.8);
-      color: white;
-      padding: 20px 40px;
-      text-align: center;
-      backdrop-filter: blur(4px);
-    }
-
-    h1 {
-      margin: 0;
-    }
-
-    main {
-      padding: 40px;
-      width: 60%;
-      max-width: 800px;
-      margin: 40px auto;
-      background-color: rgba(255, 255, 255, 0.85);
-      border-radius: 12px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-      backdrop-filter: blur(8px);
-    }
-
-    h2 {
-      color: #2c3e50;
-    }
-
-    textarea {
-      width: 100%;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-      resize: vertical;
-    }
-
-    input[type="submit"] {
-      background-color: #27ae60;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 6px;
-      font-size: 16px;
-      cursor: pointer;
-      margin-top: 10px;
-      transition: background 0.3s ease;
-    }
-
-    input[type="submit"]:hover {
-      background-color: #219150;
-    }
-
-    .result {
-      margin-top: 20px;
-      font-size: 18px;
-      font-weight: bold;
-    }
-
-    .probabilities {
-      margin-top: 20px;
-    }
-
-    .probabilities h3 {
-      color: #2c3e50;
-      margin-bottom: 15px;
-    }
-
-    .prob-bar {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
-    .prob-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .label {
-      min-width: 80px;
-      font-weight: bold;
-      color: #2c3e50;
-    }
-
-    .progress-bar {
-      flex: 1;
-      height: 20px;
-      background-color: #ecf0f1;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      transition: width 0.5s ease;
-    }
-
-    .progress-fill.negative {
-      background-color: #e74c3c;
-    }
-
-    .progress-fill.neutral {
-      background-color: #f39c12;
-    }
-
-    .progress-fill.positive {
-      background-color: #27ae60;
-    }
-
-    .percentage {
-      min-width: 50px;
-      font-weight: bold;
-      color: #2c3e50;
-    }
-
-    footer {
-      flex-shrink: 0; /* prevent footer from shrinking */
-      /* existing styles */
-      background-color: rgba(44, 62, 80, 0.8);
-      color: white;
-      text-align: center;
-      padding: 15px;
-      margin-top: 40px;
-      backdrop-filter: blur(4px);
-    }
-  </style>
-</head>
-<body>
-  <div class="spiral-bg"></div>
-
-  <header>
-    <h1>Prediksi Sentimen Argumen Sampah</h1>
-  </header>
-
-  <main>
-    <h2>Masukkan Kalimat Terkait Sampah:</h2>
-    <div class="form-action">
-      <form method="POST">
-        <textarea name="text" rows="4" placeholder="Tulis argumen..."></textarea><br>
-        <input type="submit" value="Prediksi Sentimen">
-      </form>
+{% block content %}
+  <h2>Masukkan Kalimat Terkait Sampah:</h2>
+  
+  <div class="template-info-main">
+    <p>💡 <strong>Tips:</strong> Untuk analisis batch, gunakan fitur <a href="/multi-argument">Upload File</a> dan download template terlebih dahulu.</p>
+    <div class="template-buttons-main">
+      <a href="/download-template" class="download-btn-small">📥 Download Template CSV</a>
+      <a href="/download-template-excel" class="download-btn-small excel-btn-small">📊 Download Template Excel</a>
     </div>
-    <div class="result-wrapper">
-      {% if result %}
-        <div class="result">Hasil Sentimen: <span style="color: green">{{ result }}</span></div>
-        
-        {% if probabilities %}
-          <div class="probabilities">
-            <h3>Probabilitas Sentimen:</h3>
-            <div class="prob-bar">
-              <div class="prob-item">
-                <span class="label">Positif:</span>
-                <div class="progress-bar">
-                  <div class="progress-fill positive" style="width: {{ probabilities.positif }}%"></div>
-                </div>
-                <span class="percentage">{{ probabilities.positif }}%</span>
-              </div>              
-              <div class="prob-item">
-                <span class="label">Netral:</span>
-                <div class="progress-bar">
-                  <div class="progress-fill neutral" style="width: {{ probabilities.netral }}%"></div>
-                </div>
-                <span class="percentage">{{ probabilities.netral }}%</span>
+  </div>
+  
+  <div class="form-action">
+    <form method="POST">
+      <textarea name="text" rows="4" placeholder="Tulis argumen..."></textarea><br>
+      <input type="submit" value="Prediksi Sentimen">
+    </form>
+  </div>
+  <div class="result-wrapper">
+    {% if result %}
+      <div class="result">Hasil Sentimen: <span style="color: green">{{ result }}</span></div>
+      
+      {% if probabilities %}
+        <div class="probabilities">
+          <h3>Probabilitas Sentimen:</h3>
+          <div class="prob-bar">
+            <div class="prob-item">
+              <span class="label">Negatif:</span>
+              <div class="progress-bar">
+                <div class="progress-fill negative" style="width: {{ probabilities.negatif }}%"></div>
               </div>
-              <div class="prob-item">
-                <span class="label">Negatif:</span>
-                <div class="progress-bar">
-                  <div class="progress-fill negative" style="width: {{ probabilities.negatif }}%"></div>
-                </div>
-                <span class="percentage">{{ probabilities.negatif }}%</span>
+              <span class="percentage">{{ probabilities.negatif }}%</span>
+            </div>
+            <div class="prob-item">
+              <span class="label">Netral:</span>
+              <div class="progress-bar">
+                <div class="progress-fill neutral" style="width: {{ probabilities.netral }}%"></div>
               </div>
+              <span class="percentage">{{ probabilities.netral }}%</span>
+            </div>
+            <div class="prob-item">
+              <span class="label">Positif:</span>
+              <div class="progress-bar">
+                <div class="progress-fill positive" style="width: {{ probabilities.positif }}%"></div>
+              </div>
+              <span class="percentage">{{ probabilities.positif }}%</span>
             </div>
           </div>
-        {% endif %}
+        </div>
       {% endif %}
-    </div>
-  </main>
-
-  <footer>
-    &copy; 2025 Prediksi Sentimen. Dibuat oleh Rifqi.
-  </footer>
-</body>
-</html>
+    {% endif %}
+  </div>
+{% endblock %}

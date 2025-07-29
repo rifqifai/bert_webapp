@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}Prediksi Sentimen{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <div class="spiral-bg"></div>
+
+  {% include 'partials/header.html' %}
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  {% include 'partials/footer.html' %}
+</body>
+</html> 

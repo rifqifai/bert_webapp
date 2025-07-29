@@ -1,0 +1,485 @@
+/* Reset and Base Styles */
+html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f5f7fa;
+  position: relative;
+  overflow-x: auto;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Spiral Gradient Background */
+.spiral-bg {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 200vmax;
+  height: 200vmax;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: conic-gradient(
+    #FFB74D,   /* Orange */
+    #ffff61,   /* Coral */
+    #c8ff76,   /* Yellow */
+    #73deb5,   /* Green */
+    #64B5F6    /* Blue */
+  );
+  animation:
+    spin 10s linear infinite;
+  filter: blur(120px);
+  z-index: -1;
+  pointer-events: none;
+}
+
+@keyframes spin {
+  0%   { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Header Styles */
+header {
+  background-color: rgba(44, 62, 80, 0.8);
+  color: white;
+  padding: 20px 40px;
+  text-align: center;
+  backdrop-filter: blur(4px);
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+}
+
+h1 {
+  margin: 0;
+}
+
+.nav-links {
+  margin-top: 10px;
+}
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  margin: 0 10px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  transition: background 0.3s ease;
+}
+
+.nav-links a:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Main Content */
+main {
+  padding: 40px;
+  width: 90%;
+  max-width: 1200px;
+  margin: 40px auto;
+  background-color: rgba(255, 255, 255, 0.85);
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8px);
+  flex: 1;
+  margin-bottom: 0;
+  margin-top: 20px;
+  min-height: calc(100vh - 200px);
+}
+
+h2 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+h3 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+}
+
+/* Template Section Styles */
+.template-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: rgba(52, 152, 219, 0.1);
+  border-radius: 8px;
+  border-left: 4px solid #3498db;
+}
+
+.template-section h3 {
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.template-section p {
+  margin-bottom: 15px;
+  color: #34495e;
+}
+
+.template-buttons {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.download-btn {
+  display: inline-block;
+  background-color: #3498db;
+  color: white;
+  text-decoration: none;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-weight: bold;
+  transition: background 0.3s ease;
+  margin-bottom: 15px;
+}
+
+.download-btn:hover {
+  background-color: #2980b9;
+}
+
+.excel-btn {
+  background-color: #217346;
+}
+
+.excel-btn:hover {
+  background-color: #1e6b3d;
+}
+
+.template-info {
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 15px;
+  border-radius: 6px;
+  margin-top: 15px;
+}
+
+.template-info ul {
+  margin-top: 10px;
+  padding-left: 20px;
+}
+
+.template-info li {
+  margin-bottom: 5px;
+  color: #34495e;
+}
+
+.template-info code {
+  background-color: #ecf0f1;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: monospace;
+}
+
+/* Template Info Main (for index page) */
+.template-info-main {
+  background-color: rgba(52, 152, 219, 0.1);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 4px solid #3498db;
+}
+
+.template-info-main p {
+  margin-bottom: 10px;
+  color: #34495e;
+}
+
+.template-info-main a {
+  color: #3498db;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.template-info-main a:hover {
+  text-decoration: underline;
+}
+
+.template-buttons-main {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.download-btn-small {
+  display: inline-block;
+  background-color: #3498db;
+  color: white;
+  text-decoration: none;
+  padding: 8px 15px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: bold;
+  transition: background 0.3s ease;
+}
+
+.download-btn-small:hover {
+  background-color: #2980b9;
+}
+
+.excel-btn-small {
+  background-color: #217346;
+}
+
+.excel-btn-small:hover {
+  background-color: #1e6b3d;
+}
+
+/* Upload Section */
+.upload-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+}
+
+.file-input {
+  margin-bottom: 15px;
+}
+
+.file-input input[type="file"] {
+  padding: 10px;
+  border: 2px dashed #3498db;
+  border-radius: 6px;
+  width: 100%;
+  background-color: rgba(52, 152, 219, 0.1);
+}
+
+
+
+/* Form Elements */
+textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  resize: vertical;
+}
+
+input[type="submit"] {
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.3s ease;
+}
+
+input[type="submit"]:hover {
+  background-color: #219150;
+}
+
+/* Messages */
+.error {
+  color: #e74c3c;
+  background-color: rgba(231, 76, 60, 0.1);
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.success {
+  color: #27ae60;
+  background-color: rgba(39, 174, 96, 0.1);
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+/* Results */
+.result {
+  margin-top: 20px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.probabilities {
+  margin-top: 20px;
+}
+
+.probabilities h3 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+}
+
+.prob-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.prob-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.label {
+  min-width: 80px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 20px;
+  background-color: #ecf0f1;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  transition: width 0.5s ease;
+}
+
+.progress-fill.negative {
+  background-color: #e74c3c;
+}
+
+.progress-fill.neutral {
+  background-color: #f39c12;
+}
+
+.progress-fill.positive {
+  background-color: #27ae60;
+}
+
+.percentage {
+  min-width: 50px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+/* Results Table */
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.results-table th {
+  background-color: #34495e;
+  color: white;
+  padding: 12px;
+  text-align: left;
+  font-weight: bold;
+}
+
+.results-table td {
+  padding: 12px;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.results-table tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Sentiment Badges */
+.sentiment-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.sentiment-negatif {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.sentiment-netral {
+  background-color: #f39c12;
+  color: white;
+}
+
+.sentiment-positif {
+  background-color: #27ae60;
+  color: white;
+}
+
+/* Small Progress Bars for Table */
+.prob-bar-small {
+  width: 60px;
+  height: 8px;
+  background-color: #ecf0f1;
+  border-radius: 4px;
+  overflow: hidden;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.prob-fill-small {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.prob-fill-negatif {
+  background-color: #e74c3c;
+}
+
+.prob-fill-netral {
+  background-color: #f39c12;
+}
+
+.prob-fill-positif {
+  background-color: #27ae60;
+}
+
+/* Footer */
+footer {
+  flex-shrink: 0;
+  background-color: rgba(44, 62, 80, 0.8);
+  color: white;
+  text-align: center;
+  padding: 15px;
+  margin-top: auto;
+  backdrop-filter: blur(4px);
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  z-index: 100;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  main {
+    width: 95%;
+    padding: 20px;
+  }
+  
+  .template-buttons,
+  .template-buttons-main {
+    flex-direction: column;
+  }
+  
+  .download-btn,
+  .download-btn-small {
+    text-align: center;
+  }
+} 

@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Upload File - Prediksi Sentimen{% endblock %}
+
+{% block content %}
+  <h2>Upload File untuk Analisis Sentimen</h2>
+  
+  <div class="template-section">
+    <h3>📋 Template File</h3>
+    <p>Download template untuk melihat format yang benar:</p>
+    <div class="template-buttons">
+      <a href="/download-template" class="download-btn">
+        📥 Download Template CSV
+      </a>
+      <a href="/download-template-excel" class="download-btn excel-btn">
+        📊 Download Template Excel
+      </a>
+    </div>
+          <div class="template-info">
+        <strong>Format yang Didukung:</strong>
+        <ul>
+          <li><strong>CSV:</strong> File teks dengan pemisah koma</li>
+          <li><strong>Excel:</strong> File XLS/XLSX dengan formatting</li>
+          <li>Kolom <code>text</code>: Berisi teks yang akan dianalisis (akan digunakan otomatis)</li>
+          <li>Kolom <code>kategori</code>: Kategori tambahan (opsional)</li>
+          <li>Jika kolom "text" tidak ada, kolom pertama akan digunakan</li>
+          <li>Pastikan encoding UTF-8 untuk mendukung karakter Indonesia</li>
+        </ul>
+      </div>
+  </div>
+  
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+
+      {% if filename %}
+      <div class="success">
+        File berhasil diupload: {{ filename }}
+        {% if results %}
+          <br><small>📊 Kolom "{{ text_column }}" digunakan untuk analisis sentimen</small>
+        {% endif %}
+      </div>
+    {% endif %}
+
+  <div class="upload-section">
+    <form method="POST" enctype="multipart/form-data">
+      <div class="file-input">
+        <label for="file">Pilih file (CSV, XLS, XLSX):</label><br>
+        <input type="file" name="file" id="file" accept=".csv,.xls,.xlsx" required>
+      </div>
+
+
+
+      <input type="submit" value="Prediksi Sentimen">
+    </form>
+  </div>
+
+  {% if results %}
+    <h3>Hasil Analisis Sentimen ({{ results|length }} data)</h3>
+    <div style="overflow-x: auto;">
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Teks</th>
+            <th>Sentimen</th>
+            <th>Probabilitas</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for result in results %}
+            <tr>
+              <td>{{ result.index }}</td>
+              <td>{{ result.text }}</td>
+              <td>
+                <span class="sentiment-badge sentiment-{{ result.sentiment }}">
+                  {{ result.sentiment }}
+                </span>
+              </td>
+              <td>
+                <div style="font-size: 12px;">
+                  <div>
+                    <span class="prob-bar-small">
+                      <div class="prob-fill-small prob-fill-negatif" style="width: {{ result.negatif_prob }}%"></div>
+                    </span>
+                    Negatif: {{ result.negatif_prob }}%
+                  </div>
+                  <div>
+                    <span class="prob-bar-small">
+                      <div class="prob-fill-small prob-fill-netral" style="width: {{ result.netral_prob }}%"></div>
+                    </span>
+                    Netral: {{ result.netral_prob }}%
+                  </div>
+                  <div>
+                    <span class="prob-bar-small">
+                      <div class="prob-fill-small prob-fill-positif" style="width: {{ result.positif_prob }}%"></div>
+                    </span>
+                    Positif: {{ result.positif_prob }}%
+                  </div>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+{% endblock %} 
