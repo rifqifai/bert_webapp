@@ -24,17 +24,28 @@ def predict_sentiment(text):
     inputs = tokenizer(text, return_tensors='pt', truncation=True, padding=True, max_length=128)
     with torch.no_grad():
         outputs = model(**inputs)
+        # Get probabilities using softmax
+        probabilities = torch.softmax(outputs.logits, dim=1)
         pred = torch.argmax(outputs.logits, dim=1).item()
-    return label_map_inv[pred]
+        
+        # Convert to percentages
+        prob_percentages = {
+            'negatif': round(probabilities[0][0].item() * 100, 2),
+            'netral': round(probabilities[0][1].item() * 100, 2),
+            'positif': round(probabilities[0][2].item() * 100, 2)
+        }
+        
+        return label_map_inv[pred], prob_percentages
 
 @app.route("/", methods=["GET", "POST"])
 def index():
     result = ""
+    probabilities = None
     if request.method == "POST":
         input_text = request.form["text"]
-        result = predict_sentiment(input_text)
-    return render_template("index.html", result=result)
+        result, probabilities = predict_sentiment(input_text)
+    return render_template("index.html", result=result, probabilities=probabilities)
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 1000))
     app.run(host="0.0.0.0", port=port, debug=False)

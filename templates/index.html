@@ -107,6 +107,64 @@
       font-weight: bold;
     }
 
+    .probabilities {
+      margin-top: 20px;
+    }
+
+    .probabilities h3 {
+      color: #2c3e50;
+      margin-bottom: 15px;
+    }
+
+    .prob-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .prob-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .label {
+      min-width: 80px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    .progress-bar {
+      flex: 1;
+      height: 20px;
+      background-color: #ecf0f1;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      transition: width 0.5s ease;
+    }
+
+    .progress-fill.negative {
+      background-color: #e74c3c;
+    }
+
+    .progress-fill.neutral {
+      background-color: #f39c12;
+    }
+
+    .progress-fill.positive {
+      background-color: #27ae60;
+    }
+
+    .percentage {
+      min-width: 50px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
     footer {
       flex-shrink: 0; /* prevent footer from shrinking */
       /* existing styles */
@@ -137,6 +195,35 @@
     <div class="result-wrapper">
       {% if result %}
         <div class="result">Hasil Sentimen: <span style="color: green">{{ result }}</span></div>
+        
+        {% if probabilities %}
+          <div class="probabilities">
+            <h3>Probabilitas Sentimen:</h3>
+            <div class="prob-bar">
+              <div class="prob-item">
+                <span class="label">Positif:</span>
+                <div class="progress-bar">
+                  <div class="progress-fill positive" style="width: {{ probabilities.positif }}%"></div>
+                </div>
+                <span class="percentage">{{ probabilities.positif }}%</span>
+              </div>              
+              <div class="prob-item">
+                <span class="label">Netral:</span>
+                <div class="progress-bar">
+                  <div class="progress-fill neutral" style="width: {{ probabilities.netral }}%"></div>
+                </div>
+                <span class="percentage">{{ probabilities.netral }}%</span>
+              </div>
+              <div class="prob-item">
+                <span class="label">Negatif:</span>
+                <div class="progress-bar">
+                  <div class="progress-fill negative" style="width: {{ probabilities.negatif }}%"></div>
+                </div>
+                <span class="percentage">{{ probabilities.negatif }}%</span>
+              </div>
+            </div>
+          </div>
+        {% endif %}
       {% endif %}
     </div>
   </main>
