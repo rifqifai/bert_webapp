@@ -1,8 +1,36 @@
-<header>
+<header id="main-header">
   <h1>{{ header_title|default('Prediksi Sentimen Argumen Sampah') }}</h1>
+  <button class="hamburger" id="hamburger-btn" onclick="toggleMenu()">
+    <span id="hamburger-icon">&#9776;</span>
+  </button>
   <div class="nav-links">
-    <a href="/">Input Manual</a>
-    <a href="/multi-argument">Upload File</a>
-    <a href="/analytic">Analisis</a>
+    <a href="/"{% if request.path == '/' %} class="active"{% endif %}>Input Manual</a>
+    <a href="/multi-argument"{% if request.path == '/multi-argument' %} class="active"{% endif %}>Upload File</a>
+    <a href="/analytic"{% if request.path == '/analytic' %} class="active"{% endif %}>Analisis</a>
   </div>
-</header> 
+</header>
+
+<script>
+function toggleMenu() {
+  var nav = document.querySelector('.nav-links');
+  var icon = document.getElementById('hamburger-icon');
+  nav.classList.toggle('show');
+  if(nav.classList.contains('show')) {
+    icon.innerHTML = '&times;';
+    document.addEventListener('click', hideMenuOnClickOutside);
+  } else {
+    icon.innerHTML = '&#9776;';
+    document.removeEventListener('click', hideMenuOnClickOutside);
+  }
+}
+function hideMenuOnClickOutside(e) {
+  var header = document.getElementById('main-header');
+  var nav = document.querySelector('.nav-links');
+  var icon = document.getElementById('hamburger-icon');
+  if(!header.contains(e.target)) {
+    nav.classList.remove('show');
+    icon.innerHTML = '&#9776;';
+    document.removeEventListener('click', hideMenuOnClickOutside);
+  }
+}
+</script>
